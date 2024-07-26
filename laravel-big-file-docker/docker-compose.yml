@@ -1,0 +1,63 @@
+version: "3.6"
+
+services:
+
+  php:
+    container_name: laravel-big-file-php
+    restart: always
+    tty: true
+    build:
+      context: .
+      dockerfile: php/dockerfile
+    volumes:
+      - ../src/:/var/www/html/
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+    ports:
+      - "9000:9000"
+    networks:
+      - laravelBigFile
+
+  nginx:
+    container_name: laravel-big-file-nginx
+    restart: always
+    tty: true
+    build:
+      context: .
+      dockerfile: nginx/dockerfile
+    volumes:
+      - ../src/:/var/www/html/
+      - ./nginx/key.pem:/root/ssl/key.pem
+      - ./nginx/cert.pem:/root/ssl/cert.pem
+    ports:
+      - 443:443
+      - 80:80
+    depends_on:
+      - php
+    networks:
+      - laravelBigFile
+  mysql:
+    image: mysql/mysql-server:8.0
+    restart: always
+    tty: true
+    container_name: laravel-big-file-mysql
+    environment:
+      MYSQL_DATABASE: laravel_big_files
+      MYSQL_USER: theroot
+      MYSQL_PASSWORD: akjduyeduwyediuewduwediuwenuyvtoadbjch
+      MYSQL_ROOT_PASSWORD: akjduyeduwyediuewduwediuwenuyvtoadbjch
+    ports:
+      - "3306:3306"
+    networks:
+      - laravelBigFile
+  redis:
+    image: redis:latest
+    container_name: laravel-big-file-redis
+    restart: always
+    tty: true
+    ports:
+      - "6379:6379"
+    networks:
+      - laravelBigFile
+networks:
+  laravelBigFile:
+    driver: bridge
